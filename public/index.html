@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>番茄智耘 · 面向江汉平原的番茄种植智能体</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5.5' fill='%23C8402E'/%3E%3Ccircle cx='12' cy='14' r='5.2' fill='none' stroke='%23fff' stroke-width='1.7'/%3E%3Cpath d='M12 8.8c-1.4-1.1-3.7-.5-4.6 1' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M12 8.8c1.4-1.1 3.7-.5 4.6 1' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#FAF8F4;
+  --bg-soft:#F3EFE7;
+  --surface:#FFFFFF;
+  --ink:#1F1B17;
+  --muted:#6E655C;
+  --faint:#A89E92;
+  --line:#E8E2D6;
+  --line-2:#F0EBE0;
+  --accent:#C8402E;
+  --accent-deep:#9E2F1D;
+  --accent-tint:#F7E9E4;
+  --radius:14px;
+  --shadow-sm:0 1px 2px rgba(40,30,20,.05),0 6px 20px rgba(40,30,20,.06);
+  --shadow:0 2px 6px rgba(40,30,20,.06),0 24px 60px -12px rgba(40,30,20,.16);
+  --maxw:1120px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.7;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer}
+::selection{background:var(--accent);color:#fff}
+
+/* ============ 顶部导航 ============ */
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(250,248,244,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{
+  max-width:var(--maxw);margin:0 auto;padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:16.5px;letter-spacing:-.01em}
+.brand .logo{width:32px;height:32px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:#fff}
+.brand .logo svg{width:18px;height:18px}
+.nav-links{display:flex;gap:2px}
+.nav-links a{font-size:14px;color:var(--muted);padding:7px 14px;border-radius:999px;transition:all .18s}
+.nav-links a:hover{color:var(--ink);background:var(--line-2)}
+.nav-cta{
+  background:var(--accent);color:#fff;font-size:14px;font-weight:500;
+  padding:9px 18px;border-radius:999px;transition:background .18s;white-space:nowrap;
+}
+.nav-cta:hover{background:var(--accent-deep)}
+
+/* ============ Hero：参考图一居中排版 ============ */
+.hero{
+  position:relative;overflow:hidden;
+  padding:96px 24px 110px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #F0E6D4 0%, transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, #F3E4DC 0%, transparent 60%),
+    var(--bg);
+}
+/* 番茄枝条装饰图：放在右侧，multiply 让白底融入背景 */
+.hero-deco{
+  position:absolute;right:-40px;bottom:-30px;width:520px;max-width:48vw;
+  opacity:.42;mix-blend-mode:multiply;pointer-events:none;user-select:none;
+  transform:rotate(-4deg);
+}
+.hero-deco img{width:100%;height:auto}
+
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+  letter-spacing:.08em;color:var(--accent);margin-bottom:28px;
+}
+.hero-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+
+.hero h1{
+  position:relative;font-size:clamp(36px,5.6vw,64px);line-height:1.18;
+  font-weight:700;letter-spacing:-.02em;max-width:18ch;
+}
+.hero h1 .hl{color:var(--accent)}
+.hero h1 .underline{
+  background-image:linear-gradient(transparent 68%, #F0C9BC 68%, #F0C9BC 92%, transparent 92%);
+  padding:0 4px;
+}
+
+.hero p.lead{
+  position:relative;margin:26px auto 0;max-width:56ch;
+  font-size:16.5px;line-height:1.85;color:var(--muted);
+}
+
+/* 三步胶囊 */
+.hero-steps{
+  position:relative;margin-top:36px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+}
+.step-pill{
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:9px 18px;font-size:13.5px;color:var(--ink);box-shadow:var(--shadow-sm);
+}
+.step-pill b{color:var(--accent);margin-right:6px;font-weight:600}
+.step-arrow{color:var(--faint);font-size:14px}
+
+.hero-actions{position:relative;margin-top:36px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:15.5px;font-weight:500;
+  padding:15px 30px;border-radius:999px;border:1px solid transparent;transition:all .18s;
+}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 8px 24px -6px rgba(200,64,46,.45)}
+.btn-primary:hover{background:var(--accent-deep);transform:translateY(-1px)}
+.btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ============ 六大功能 ============ */
+.section{max-width:var(--maxw);margin:0 auto;padding:80px 24px}
+.sec-head{text-align:center;margin-bottom:44px}
+.sec-head .sub{color:var(--muted);font-size:15px;margin-top:8px}
+.sec-head h2{font-size:clamp(26px,3.4vw,34px);font-weight:700;letter-spacing:-.015em}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feature{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:28px;transition:all .22s;position:relative;cursor:pointer;display:flex;flex-direction:column;
+}
+.feature:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--accent)}
+.feature .f-ico{
+  width:46px;height:46px;border-radius:12px;display:grid;place-items:center;margin-bottom:18px;
+  background:var(--accent-tint);color:var(--accent);
+}
+.feature .f-ico svg{width:24px;height:24px}
+.feature h3{font-size:17px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+.feature p{font-size:14px;color:var(--muted);flex:1;line-height:1.7}
+.feature .f-ask{margin-top:20px;font-size:13.5px;color:var(--accent);font-weight:500;line-height:1.6}
+.feature .f-ask::before{content:"试试 → ";color:var(--faint);font-weight:400}
+
+/* ============ 底部 ============ */
+.footer{background:#231D18;color:#B7ADA0;padding:56px 24px}
+.footer-inner{max-width:var(--maxw);margin:0 auto;display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap}
+.footer b{color:#fff;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.footer p{font-size:13.5px;opacity:.85;margin-top:8px;max-width:44ch;line-height:1.7}
+.footer .note{font-size:12px;opacity:.6;margin-top:16px}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);z-index:99;
+  background:#231D18;color:#fff;padding:11px 20px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;transition:all .3s;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============ 响应式 ============ */
+@media (max-width:900px){
+  .feature-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-links{display:none}
+  .section{padding:56px 20px}
+  .hero{padding:64px 20px 80px}
+  .hero-deco{opacity:.28;right:-80px;width:320px}
+}
+@media (max-width:560px){
+  .feature-grid{grid-template-columns:1fr}
+  .hero-steps{flex-direction:column}
+  .step-arrow{transform:rotate(90deg)}
+  .hero h1{max-width:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 顶部导航 ============ -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6.5"/><path d="M12 7.5c-1.8-1.4-4.6-.7-5.7 1.2"/><path d="M12 7.5c1.8-1.4 4.6-.7 5.7 1.2"/></svg>
+      </span>
+      <span>番茄智耘</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#features">六项能力</a>
+      <a href="chat.html">智能问答</a>
+      <a href="chat.html?tab=diagnose">病虫害诊断</a>
+    </nav>
+    <a class="nav-cta" href="chat.html">开始咨询</a>
+  </div>
+</header>
+
+<!-- ============ Hero ============ -->
+<section class="hero">
+  <div class="hero-deco" aria-hidden="true">
+    <img src="assets/tomato-branch.jpg" alt="">
+  </div>
+
+  <span class="hero-tag">面向江汉平原 · 番茄种植智能体</span>
+
+  <h1>
+    欢迎来到<span class="hl">番茄智耘</span>，<br>
+    让 <span class="underline">AI 农技师</span> 陪你<br>从播种到丰收。
+  </h1>
+
+  <p class="lead">
+    我是专门面向江汉平原的番茄种植助手。从育苗、定植、花果期到采收，
+    水肥怎么算、病害怎么防、农事怎么排——只要是大棚番茄上拿不准的事，都可以问我。
+  </p>
+
+  <div class="hero-steps">
+    <span class="step-pill"><b>①</b>说出你的问题</span>
+    <span class="step-arrow">→</span>
+    <span class="step-pill"><b>②</b>拍病照 / 问技术 / 算水肥</span>
+    <span class="step-arrow">→</span>
+    <span class="step-pill"><b>③</b>拿方案下棚</span>
+  </div>
+
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="chat.html">立即咨询 AI 农技师</a>
+    <a class="btn btn-ghost" href="chat.html?ask=给番茄定植后一周，水肥管理应该注意什么？">看看它怎么答</a>
+  </div>
+</section>
+
+<!-- ============ 六大功能 ============ -->
+<section class="section" id="features">
+  <div class="sec-head">
+    <h2>六项能力，一站集成</h2>
+    <div class="sub">把一位农技顾问装进口袋</div>
+  </div>
+  <div class="feature-grid" id="featureGrid"></div>
+</section>
+
+<!-- ============ 底部 ============ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <b>番茄智耘</b>
+      <p>面向江汉平原大棚番茄种植者的 AI 智能农技师，对接 Coze 智能体实时问答。</p>
+      <div class="note">安全提示：本页面通过后端代理访问 Coze，密钥不暴露于前端。</div>
+    </div>
+    <div>
+      <b>六项能力</b>
+      <p>智能问答 · 病虫害诊断 · 水肥茬口 · 农事提醒 · 种植记事本 · 农技知识测试</p>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const FEATURES = [
+  {t:'智能问答', d:'种植技术问题实时解答，答案带来源与可信度标注。',
+   ask:'大棚番茄第一穗花坐果期，追肥重点是什么？', s:'<circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M9.5 15a4 4 0 0 0 5 0"/><path d="M12 3v2"/>'},
+  {t:'病虫害诊断', d:'上传叶片/果实照片，识别病害并给防治方案。',
+   ask:'帮我诊断一下，番茄叶片上有灰白色霉层是什么病？', s:'<path d="M3 5h11M9 5v4M3 9h12M15 5c2 0 4 1 5 3l-1 2-2-1-1 2-2-1-1 2-1-1z"/><circle cx="6" cy="17" r="1.4"/><circle cx="11" cy="17" r="1.4"/><circle cx="16" cy="17" r="1.4"/>'},
+  {t:'水肥与茬口方案', d:'按生育期与土壤条件，生成个性化农事卡。',
+   ask:'给我一份大棚春茬番茄的水肥与茬口安排方案。', s:'<path d="M4 20h16M6 20V9l6-5 6 5v11"/><path d="M9 12h6M9 15h6M9 18h6"/>'},
+  {t:'农事提醒', d:'按生育期自动推送浇水、打杈、防病等提醒。',
+   ask:'番茄开花坐果期，我应该重点做哪些农事？', s:'<circle cx="12" cy="13" r="8"/><path d="M12 8v5l3 2"/><path d="M12 3v2"/>'},
+  {t:'种植记事本', d:'文字/语音/照片记录，形成长期种植记忆。',
+   ask:'我想记录今天的农事，帮我整理一个记事模板。', s:'<path d="M6 4h10v16H6z"/><path d="M9 8h4M9 12h4"/>'},
+  {t:'农技知识测试', d:'一套农技测评，检验并巩固种植知识。',
+   ask:'给我出5道番茄种植的农技知识测试题。', s:'<path d="M12 4v16M8 8h8M8 12h8M8 16h5"/><circle cx="19" cy="6" r="1.4"/><circle cx="19" cy="12" r="1.4"/><circle cx="19" cy="18" r="1.4"/>'},
+];
+
+const grid = document.getElementById('featureGrid');
+grid.innerHTML = FEATURES.map(f=>{
+  // 种植记事本跳独立的记事本页面，不进聊天
+  const href = (f.t === '种植记事本') ? 'notes.html' : ('chat.html?ask=' + encodeURIComponent(f.ask));
+  return `
+  <a class="feature" href="${href}" tabindex="0">
+    <div class="f-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${f.s}</svg></div>
+    <h3>${f.t}</h3>
+    <p>${f.d}</p>
+    <div class="f-ask">${f.ask}</div>
+  </a>`;
+}).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+{
+  "src": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\index.html",
+  "url": "file:///C:/Users/Lenovo/Desktop/ai%2B%E5%86%9C%E4%B8%9A%E6%A8%A1%E5%9E%8B/tomato-agent/public/index.html",
+  "outdir": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\_shots",
+  "include": [
+    "lint",
+    "screenshots",
+    "structure"
+  ],
+  "shots": {
+    "desktop": {
+      "screenshot": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\_shots\\index_desktop.jpg",
+      "screenshotBytes": 162157,
+      "truncated": false,
+      "structure": {
+        "title": "番茄AI农技助手",
+        "firstH1": "种好番茄，让AI 陪你从播种到丰收",
+        "viewport": {
+          "w": 1410,
+          "h": 758
+        },
+        "fullpage": {
+          "w": 1410,
+          "h": 2397
+        },
+        "counts": {
+          "section": 2,
+          "h1": 1,
+          "h2": 2,
+          "img": 1,
+          "canvas": 0,
+          "svg": 13,
+          "links": 5,
+          "buttons": 9
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": [],
+      "reportSource": "cdp"
+    },
+    "mobile": {
+      "screenshot": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\_shots\\index_mobile.jpg",
+      "screenshotBytes": 230544,
+      "truncated": false,
+      "structure": {
+        "title": "番茄AI农技助手",
+        "firstH1": "种好番茄，让AI 陪你从播种到丰收",
+        "viewport": {
+          "w": 492,
+          "h": 702
+        },
+        "fullpage": {
+          "w": 492,
+          "h": 3526
+        },
+        "counts": {
+          "section": 2,
+          "h1": 1,
+          "h2": 2,
+          "img": 1,
+          "canvas": 0,
+          "svg": 13,
+          "links": 5,
+          "buttons": 9
+        }
+      },
+      "consoleErrors": [],
+      "consoleWarnings": [],
+      "horizontalOverflow": [],
+      "resourceErrors": [],
+      "reportSource": "cdp"
+    }
+  },
+  "engine": "chrome_cli",
+  "chromiumExec": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "engineDegraded": true,
+  "engineDegradedReason": "playwright 未装",
+  "elapsedSec": 7.66,
+  "schemaVersion": 2,
+  "status": "pass",
+  "engineInfo": {
+    "name": "chrome_cli",
+    "degraded": true,
+    "degradedReasons": [
+      "playwright 未装"
+    ]
+  },
+  "input": {
+    "original": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\index.html",
+    "resolvedPath": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\index.html",
+    "baseUrl": "file:///C:/Users/Lenovo/Desktop/ai%2B%E5%86%9C%E4%B8%9A%E6%A8%A1%E5%9E%8B/tomato-agent/public/index.html",
+    "protocol": "file",
+    "cwd": "C:\\Users\\Lenovo\\Doubao\\chats\\2026-10-27\\new-chat",
+    "mediaMode": {
+      "reducedMotion": true
+    }
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "viewport": "desktop",
+        "path": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\_shots\\index_desktop.jpg",
+        "size": 162157,
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      },
+      {
+        "viewport": "mobile",
+        "path": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\_shots\\index_mobile.jpg",
+        "size": 230544,
+        "visualCoverage": {
+          "complete": true,
+          "reason": null
+        }
+      }
+    ]
+  },
+  "summary": {
+    "blocker": 0,
+    "error": 0,
+    "warning": 0,
+    "info": 0
+  },
+  "findings": [],
+  "prioritizedActions": [],
+  "reportPath": "C:\\Users\\Lenovo\\Desktop\\ai+农业模型\\tomato-agent\\public\\_shots\\report.json"
+}

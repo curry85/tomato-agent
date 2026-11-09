@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>智能问答 · 番茄智耘</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5.5' fill='%23C8402E'/%3E%3Ccircle cx='12' cy='14' r='5.2' fill='none' stroke='%23fff' stroke-width='1.7'/%3E%3Cpath d='M12 8.8c-1.4-1.1-3.7-.5-4.6 1' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M12 8.8c1.4-1.1 3.7-.5 4.6 1' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#FAF8F4;
+  --surface:#FFFFFF;
+  --ink:#1F1B17;
+  --muted:#6E655C;
+  --faint:#A89E92;
+  --line:#E8E2D6;
+  --line-2:#F0EBE0;
+  --accent:#C8402E;
+  --accent-deep:#9E2F1D;
+  --accent-tint:#F7E9E4;
+  --sidebar-bg:#231D18;
+  --sidebar-ink:#E8E0D4;
+  --sidebar-muted:#8C8275;
+  --radius:14px;
+  --shadow-sm:0 1px 2px rgba(40,30,20,.05),0 6px 20px rgba(40,30,20,.06);
+  --shadow:0 2px 6px rgba(40,30,20,.06),0 24px 60px -12px rgba(40,30,20,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.7;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  height:100vh;overflow:hidden;
+}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer}
+::selection{background:var(--accent);color:#fff}
+
+/* ============ 整体左右布局 ============ */
+.app{display:flex;height:100vh}
+
+/* ============ 左侧边栏 ============ */
+.sidebar{
+  width:260px;flex-shrink:0;background:var(--sidebar-bg);color:var(--sidebar-ink);
+  display:flex;flex-direction:column;padding:20px 16px;
+}
+.side-brand{display:flex;align-items:center;gap:10px;padding:6px 8px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.side-brand .logo{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:#fff;flex-shrink:0}
+.side-brand .logo svg{width:18px;height:18px}
+.side-brand .tt b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em;color:#fff}
+.side-brand .tt span{display:block;font-size:11.5px;color:var(--sidebar-muted);margin-top:2px}
+
+.side-section-label{
+  font-size:11.5px;letter-spacing:.1em;color:var(--sidebar-muted);
+  padding:22px 10px 8px;text-transform:uppercase;
+}
+.side-nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
+.side-item{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;
+  color:var(--sidebar-ink);font-size:14px;transition:all .15s;cursor:pointer;border:none;background:transparent;text-align:left;width:100%;
+}
+.side-item svg{width:17px;height:17px;opacity:.75;flex-shrink:0}
+.side-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.side-item.active{background:var(--accent);color:#fff}
+.side-item.active svg{opacity:1}
+
+.side-foot{padding-top:16px;border-top:1px solid rgba(255,255,255,.08)}
+.side-status{
+  display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sidebar-muted);
+  padding:6px 10px 12px;
+}
+.side-status .dot{width:8px;height:8px;border-radius:50%;background:#6FB98F;box-shadow:0 0 0 3px rgba(111,185,143,.18)}
+.side-back{
+  display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
+  color:var(--sidebar-ink);font-size:13.5px;border:1px solid rgba(255,255,255,.12);
+  transition:all .15s;
+}
+.side-back:hover{background:rgba(255,255,255,.06);color:#fff}
+.side-back svg{width:15px;height:15px}
+
+/* ============ 右侧主区域 ============ */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.topbar{
+  height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;border-bottom:1px solid var(--line);background:rgba(250,248,244,.9);
+  backdrop-filter:blur(10px);
+}
+.crumb{font-size:13.5px;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:600}
+.crumb .sep{margin:0 8px;color:var(--faint)}
+.topbar-status{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.topbar-status .dot{width:8px;height:8px;border-radius:50%;background:#6FB98F}
+
+.chat-wrap{flex:1;overflow:hidden;padding:24px 28px;display:flex;flex-direction:column;max-width:1080px;width:100%;margin:0 auto}
+.page-head{margin-bottom:16px}
+.page-head h1{font-size:22px;font-weight:700;letter-spacing:-.015em}
+.page-head p{color:var(--muted);font-size:13.5px;margin-top:2px}
+
+.chat-shell{
+  background:var(--surface);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow);overflow:hidden;flex:1;
+  display:flex;flex-direction:column;min-height:0;
+}
+.chat-head{padding:14px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.chat-head .ava{width:36px;height:36px;border-radius:10px;background:var(--accent);display:grid;place-items:center;flex-shrink:0;color:#fff}
+.chat-head .ava svg{width:20px;height:20px}
+.chat-head .tt{flex:1;min-width:0}
+.chat-head .tt b{display:block;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.chat-head .tt span{font-size:12px;color:var(--faint);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-head .hint{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:5px 12px;border-radius:999px;white-space:nowrap}
+.chat-body{flex:1;overflow-y:auto;padding:24px 22px;display:flex;flex-direction:column;gap:16px;background:#FCFBF8;min-height:0}
+.msg{display:flex;gap:10px;max-width:82%}
+.msg.bot{align-self:flex-start;max-width:96%}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg .bub{flex:1;padding:14px 20px;border-radius:14px;font-size:15px;line-height:1.85;white-space:pre-wrap;word-break:break-word;min-width:0}
+.msg.bot .bub{background:var(--surface);border:1px solid var(--line);border-top-left-radius:5px}
+.msg.user .bub{background:var(--accent);color:#fff;border-top-right-radius:5px}
+.msg .mini{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;margin-top:2px}
+.msg .mini svg{width:17px;height:17px}
+.msg.bot .mini{background:var(--accent-tint);color:var(--accent)}
+.msg.user .mini{background:var(--accent);color:#fff}
+.typing{display:inline-flex;gap:4px;padding:6px 2px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--faint);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}
+.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.thought{
+  margin-bottom:10px;background:var(--accent-tint);border-left:3px solid var(--accent);
+  border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted);
+}
+.thought .t-head{
+  font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;user-select:none;
+  display:flex;align-items:center;gap:6px;
+}
+.thought .t-head::after{content:"▸ 展开";font-weight:400;color:var(--faint)}
+.thought .t-body{margin-top:6px;line-height:1.7;word-break:break-word;white-space:pre-wrap}
+.thought.collapsed .t-body{display:none}
+.thought .t-body.collapsed{display:none}
+
+.msg .img{max-width:220px;border-radius:10px;margin-bottom:8px;border:1px solid var(--line)}
+.chat-foot{border-top:1px solid var(--line);padding:14px 16px;background:var(--surface);flex-shrink:0}
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tool{
+  font-size:13px;color:var(--muted);background:var(--line-2);border:1px solid transparent;
+  padding:7px 14px;border-radius:999px;cursor:pointer;transition:all .18s;
+}
+.tool:hover{color:var(--accent);border-color:var(--line);background:var(--surface)}
+.tool.active{background:var(--accent);color:#fff}
+.input-row{display:flex;gap:10px;align-items:flex-end}
+.input-row textarea{
+  flex:1;resize:none;border:1px solid var(--line);border-radius:12px;padding:12px 16px;
+  font-size:15px;font-family:inherit;line-height:1.5;background:var(--surface);min-height:48px;max-height:140px;
+  outline:none;transition:border-color .18s,box-shadow .18s;
+}
+.input-row textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint)}
+.icon-btn{
+  width:48px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);
+  display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:all .18s;flex-shrink:0;
+}
+.icon-btn:hover{color:var(--accent);border-color:var(--accent)}
+.icon-btn svg{width:22px;height:22px}
+.icon-btn.send{background:var(--accent);color:#fff;border-color:var(--accent)}
+.icon-btn.send:hover{background:var(--accent-deep)}
+.icon-btn.record.on{background:var(--accent-deep);color:#fff;border-color:var(--accent-deep)}
+.preview-row{display:flex;flex-wrap:wrap;gap:10px;padding:10px 2px}
+.preview{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--line-2)}
+.preview img{width:88px;height:88px;object-fit:cover}
+.preview .x{
+  position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(32,20,15,.6);
+  color:#fff;border:none;cursor:pointer;font-size:13px;display:grid;place-items:center;line-height:1;
+}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);z-index:99;
+  background:#231D18;color:#fff;padding:11px 20px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;transition:all .3s;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============ 响应式：窄屏隐藏侧边栏文字 ============ */
+@media (max-width:860px){
+  .sidebar{width:64px;padding:16px 8px}
+  .side-brand .tt,.side-section-label,.side-item span,.side-back span,.side-status span{display:none}
+  .side-item{justify-content:center;padding:11px}
+  .side-back{justify-content:center}
+  .side-brand{justify-content:center;padding-bottom:14px}
+  .chat-wrap{padding:16px 12px}
+  .topbar{padding:0 16px}
+  .msg{max-width:100%}
+  .input-row textarea{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ 左侧边栏 ============ -->
+  <aside class="sidebar">
+    <div class="side-brand">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6.5"/><path d="M12 7.5c-1.8-1.4-4.6-.7-5.7 1.2"/><path d="M12 7.5c1.8-1.4 4.6-.7 5.7 1.2"/></svg>
+      </span>
+      <div class="tt">
+        <b>番茄智耘</b>
+        <span>江汉平原番茄种植助手</span>
+      </div>
+    </div>
+
+    <div class="side-section-label">能力中心</div>
+    <nav class="side-nav" id="sideNav">
+      <a class="side-item active" href="chat.html" data-tab="qa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M9.5 15a4 4 0 0 0 5 0"/></svg>
+        <span>智能问答</span>
+      </a>
+      <a class="side-item" href="chat.html?tab=diagnose" data-tab="diagnose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h11M9 5v4M3 9h12M15 5c2 0 4 1 5 3l-1 2-2-1-1 2-2-1-1 2-1-1z"/><circle cx="6" cy="17" r="1.4"/><circle cx="11" cy="17" r="1.4"/><circle cx="16" cy="17" r="1.4"/></svg>
+        <span>病虫害诊断</span>
+      </a>
+      <a class="side-item" href="chat.html?tab=fert" data-tab="fert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M6 20V9l6-5 6 5v11"/><path d="M9 12h6M9 15h6M9 18h6"/></svg>
+        <span>水肥与茬口</span>
+      </a>
+      <a class="side-item" href="chat.html?tab=remind" data-tab="remind">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 8v5l3 2"/><path d="M12 3v2"/></svg>
+        <span>农事提醒</span>
+      </a>
+      <a class="side-item" href="notes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h10v16H6z"/><path d="M9 8h4M9 12h4"/></svg>
+        <span>种植记事本</span>
+      </a>
+      <a class="side-item" href="chat.html?tab=quiz" data-tab="quiz">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M8 8h8M8 12h8M8 16h5"/><circle cx="19" cy="6" r="1.4"/><circle cx="19" cy="12" r="1.4"/><circle cx="19" cy="18" r="1.4"/></svg>
+        <span>农技知识测试</span>
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="side-status"><span class="dot"></span><span>Coze 已连接</span></div>
+      <button class="side-back" style="width:100%;margin-bottom:8px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--sidebar-ink);font-size:13.5px;cursor:pointer" onclick="switchRole()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        <span>切换身份</span>
+      </button>
+      <a class="side-back" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>返回首页</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ============ 右侧主区域 ============ -->
+  <main class="main">
+    <div class="topbar">
+      <div class="crumb">番茄智耘 <span class="sep">/</span> <b id="crumbCurrent">智能问答</b></div>
+      <div class="topbar-status"><span class="dot"></span>AI 农技师在线</div>
+    </div>
+
+    <div class="chat-wrap">
+      <div class="page-head">
+        <h1 id="pageTitle">智能问答</h1>
+        <p>说出你的种植问题，或上传叶片照片做病虫害诊断</p>
+      </div>
+
+      <div class="chat-shell">
+        <div class="chat-head">
+          <div class="ava">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6.5"/><path d="M12 7.5c-1.8-1.4-4.6-.7-5.7 1.2"/><path d="M12 7.5c1.8-1.4 4.6-.7 5.7 1.2"/></svg>
+          </div>
+          <div class="tt"><b>番茄智耘 · AI 农技师</b><span>已接入你的 Coze 智能体 · 面向江汉平原大棚番茄</span></div>
+          <span class="hint">SSE 流式回复</span>
+        </div>
+
+        <div class="chat-body" id="chatBody">
+          <div class="msg bot" id="welcomeMsg">
+            <div class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6.5"/><path d="M12 7.5c-1.8-1.4-4.6-.7-5.7 1.2"/><path d="M12 7.5c1.8-1.4 4.6-.7 5.7 1.2"/></svg></div>
+            <div class="bub" id="welcomeBub">你好，我是番茄智耘的 AI 农技师，专门面向江汉平原的大棚番茄种植。你可以：<br>· 问种植技术，比如「番茄灰霉病怎么防治」<br>· 拍一张叶片照片，我做病虫害诊断<br>· 让我帮你算水肥、排茬口、记农事<br>试试下方快捷问题，或直接输入。</div>
+          </div>
+        </div>
+
+        <div class="chat-foot">
+          <div class="toolbar" id="toolbar">
+            <button class="tool" data-ask="给我一份大棚番茄定植后的水肥管理方案">水肥方案</button>
+            <button class="tool" data-ask="请分阶段列出番茄的农事提醒要点">农事提醒</button>
+            <button class="tool" data-ask="出一套番茄种植的基础农技知识测试题">知识测试</button>
+            <button class="tool" data-ask="我要开始记录今天的大棚番茄农事，请提醒我记什么">记事本</button>
+          </div>
+          <div class="preview-row" id="previewRow" style="display:none"></div>
+          <div class="input-row">
+            <button class="icon-btn" id="imgBtn" title="上传叶片照片做诊断" onclick="pickImage()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><circle cx="9" cy="9" r="1.6"/><path d="M4 19l5-5 3 3 4-4 4 4"/></svg>
+            </button>
+            <button class="icon-btn" id="recBtn" title="语音输入" onclick="toggleVoice()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+            </button>
+            <textarea id="input" placeholder="输入你的农技问题，Enter 发送，Shift+Enter 换行…"></textarea>
+            <button class="icon-btn send" id="sendBtn" title="发送">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-3-7-7-1z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept="image/*" style="display:none">
+
+<script>
+/* ============ 聊天核心 ============ */
+const chatBody=document.getElementById('chatBody');
+const input=document.getElementById('input');
+const toast=document.getElementById('toast');
+let pendingImg=[];
+let sending=false;
+
+function toastMsg(m){toast.textContent=m;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400)}
+
+function addMsg(role,html){
+  const m=document.createElement('div');m.className='msg '+role;
+  const icon=role==='bot'
+    ?'<circle cx="12" cy="14" r="6.5"/><path d="M12 7.5c-1.8-1.4-4.6-.7-5.7 1.2"/><path d="M12 7.5c1.8-1.4 4.6-.7 5.7 1.2"/>'
+    :'<circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-4 4-6 7-6s5.5 2 7 6"/>';
+  m.innerHTML=`<div class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></div><div class="bub">${html}</div>`;
+  chatBody.appendChild(m);chatBody.scrollTop=chatBody.scrollHeight;
+  return m;
+}
+function addTyping(){
+  const m=document.createElement('div');m.className='msg bot';
+  m.innerHTML=`<div class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6.5"/><path d="M12 7.5c-1.8-1.4-4.6-.7-5.7 1.2"/><path d="M12 7.5c1.8-1.4 4.6-.7 5.7 1.2"/></svg></div><div class="bub"><span class="typing"><i></i><i></i><i></i></span></div>`;
+  chatBody.appendChild(m);chatBody.scrollTop=chatBody.scrollHeight;return m;
+}
+
+function quickAsk(text){input.value=text;send()}
+
+function previewImage(dataUrl){
+  const p=document.getElementById('previewRow');p.style.display='flex';
+  const d=document.createElement('div');d.className='preview';
+  d.innerHTML=`<img src="${dataUrl}"><button class="x" onclick="removePreview(this)">×</button>`;
+  p.appendChild(d);
+}
+function removePreview(el){el.closest('.preview').remove();const p=document.getElementById('previewRow');
+  if(!p.querySelectorAll('.preview').length)p.style.display='none'}
+
+function pickImage(){document.getElementById('fileInput').click();}
+document.getElementById('fileInput').addEventListener('change',(e)=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{pendingImg.push(r.result);previewImage(r.result);toastMsg('已添加图片，发送后由智能体做诊断')};
+  r.readAsDataURL(f);
+  e.target.value='';
+});
+
+let recognizing=false;
+function toggleVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toastMsg('当前浏览器不支持语音输入，请用 Chrome/Edge');return}
+  if(!window._sr){window._sr=new SR();window._sr.lang='zh-CN';
+    window._sr.onresult=(e)=>{input.value+=e.results[0][0].transcript};
+    window._sr.onend=()=>{document.getElementById('recBtn').classList.remove('on');recognizing=false};
+  }
+  const btn=document.getElementById('recBtn');
+  if(recognizing){window._sr.stop();btn.classList.remove('on');recognizing=false}
+  else{try{window._sr.start();btn.classList.add('on');recognizing=true;toastMsg('正在聆听…')}catch{toastMsg('语音未就绪，请稍后再试')}}
+}
+
+/* ============ 发送与 SSE ============ */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function renderMarkdown(text){
+  let t=esc(text);
+  t=t.replace(/```([\s\S]*?)```/g,(m,c)=>`<pre style="background:#F2EFEB;border-radius:10px;padding:10px;overflow-x:auto;font-size:13px">${esc(c)}</pre>`);
+  t=t.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  t=t.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  t=t.replace(/`([^`]+)`/g,'<code style="background:#F2EFEB;border-radius:5px;padding:1px 5px;font-size:13px">$1</code>');
+  t=t.replace(/\n/g,'<br>');
+  return t;
+}
+
+async function send(){
+  const text=input.value.trim();
+  if(sending)return;
+  if(!text && !pendingImg.length)return;
+  if(!text && pendingImg.length){input.value='请诊断这张照片里的番茄问题并给出防治方案';}
+  const finalText=input.value.trim();
+  sending=true;
+  const imgs=[...pendingImg];
+  let userHtml=renderMarkdown(finalText);
+  if(imgs.length)userHtml=`${imgs.map(u=>`<img class="img" src="${u}">`).join('')}${userHtml}`;
+  addMsg('user',userHtml);
+  input.value='';
+  pendingImg=[];document.getElementById('previewRow').style.display='none';
+  const typingEl=addTyping();
+  const botBub=typingEl.querySelector('.bub');
+
+  let content;
+  if(imgs.length){
+    // 先把每张图上传到我们后端，再由后端转存到 Coze 拿 file_id
+    toastMsg('图片上传中…');
+    const fileIds = [];
+    for(const dataUrl of imgs){
+      const upResp = await fetch('/api/upload', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ dataUrl })
+      });
+      const upJ = await upResp.json().catch(()=>({}));
+      if(!upResp.ok || !upJ.file_id){
+        botBub.innerHTML = '图片上传失败：' + (upJ.error || ('HTTP ' + upResp.status));
+        sending = false; return;
+      }
+      fileIds.push(upJ.file_id);
+    }
+    const arr = [{type:'text', text:finalText}];
+    fileIds.forEach(fid => arr.push({type:'image', file_id:fid}));
+    content = JSON.stringify(arr);
+  } else { content=finalText; }
+  const body={user_id:'tomato_user_001',messages:[{role:'user',content}]};
+
+  try{
+    const resp=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!resp.ok){
+      const j=await resp.json().catch(()=>({}));
+      botBub.innerHTML='出错了：'+(j.error||('HTTP '+resp.status));
+      sending=false;return;
+    }
+    const reader=resp.body.getReader();
+    const decoder=new TextDecoder();
+    let acc='',done=false,answerText='',thoughtText='',thoughtEl=null;
+    while(!done){
+      const {value,done:dn}=await reader.read();done=dn;
+      acc+=decoder.decode(value,{stream:!done});
+      let idx;
+      while((idx=acc.indexOf('\n'))>=0){
+        let line=acc.slice(0,idx);acc=acc.slice(idx+1);line=line.trim();
+        if(!line.startsWith('data:'))continue;
+        let data=line.slice(5).trim();if(data==='[DONE]')continue;
+        try{
+          const ev=JSON.parse(data);const d=ev.data||ev;const type=d.type;
+          let chunk='';const rc=d.reasoning_content;
+          if(typeof d.content==='string' && d.content)chunk=d.content;
+          else if(typeof d.delta==='string' && d.delta)chunk=d.delta;
+          else if(typeof d.text==='string' && d.text)chunk=d.text;
+          if(type==='verbose'||type==='function_call'||type==='tool_response')continue;
+          if(typeof rc==='string' && rc && rc.trim()){
+            thoughtText+=rc;
+            if(!thoughtEl){
+              thoughtEl=document.createElement('div');thoughtEl.className='thought';
+              thoughtEl.innerHTML='<span class="t-head">思考过程</span><div class="t-body"></div>';
+              thoughtEl.querySelector('.t-head').addEventListener('click',()=>{
+                thoughtEl.classList.toggle('collapsed');
+                thoughtEl.querySelector('.t-body').classList.toggle('collapsed');
+              });
+              typingEl.insertAdjacentElement('beforebegin',thoughtEl);
+            }
+            thoughtEl.querySelector('.t-body').innerHTML=esc(thoughtText).replace(/\n/g,'<br>');
+            chatBody.scrollTop=chatBody.scrollHeight;continue;
+          }
+          if(chunk){answerText+=chunk;typingEl.innerHTML=renderMarkdown(answerText);chatBody.scrollTop=chatBody.scrollHeight;}
+        }catch(e){}
+      }
+    }
+    if(!answerText)botBub.innerHTML='（本次未返回正文）';
+  }catch(err){
+    botBub.innerHTML='连接失败：'+err.message;
+    toastMsg('无法连接后端服务');
+  }
+  sending=false;
+}
+
+input.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+document.getElementById('sendBtn').addEventListener('click',send);
+document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>quickAsk(b.dataset.ask)));
+
+function switchRole(){
+  localStorage.removeItem('tomato_user_role');
+  location.reload();
+}
+
+/* ============ 根据 URL ?tab= 切换功能欢迎语；?ask= 兼容首页演示 ============ */
+const TABS = {
+  qa: {
+    title: '智能问答',
+    welcome: '你好，我是番茄智耘的 AI 农技师。<br><br>种植上的任何难题都可以问我——品种怎么选、水肥怎么管、花果期怎么调、温度怎么控、病害怎么防……<br><br>直接在下方输入你的问题就好。'
+  },
+  diagnose: {
+    title: '病虫害诊断',
+    welcome: '这是 <b>病虫害诊断</b> 。<br><br>你可以：<br>· 点输入框左下角的图片按钮，拍一张叶片 / 果实 / 茎秆的照片发给我<br>· 或者直接描述症状：叶片是什么颜色、有没有斑点 / 霉层 / 虫孔、从哪一片先开始<br><br>我会告诉你可能是什么病、现在到什么程度、用什么药、怎么防。'
+  },
+  fert: {
+    title: '水肥与茬口',
+    welcome: '这是 <b>水肥与茬口方案</b> 。<br><br>告诉我：<br>· 你现在番茄处于哪个阶段（育苗 / 定植 / 开花 / 坐果 / 采收）<br>· 大棚大致情况（江汉平原春茬 / 秋茬、土壤是砂壤还是黏土）<br>· 有没有具体的问题（比如徒长、坐不住果、早衰）<br><br>我给你一份可以直接照做的水肥节奏和茬口安排。'
+  },
+  remind: {
+    title: '农事提醒',
+    welcome: '这是 <b>农事提醒</b> 。<br><br>告诉我你番茄的<b>定植日期</b>（比如：3月15日定植），我会自动推算你现在处于哪个生育期，每天给你推一张农事卡：<br>· <b>当前节点</b>：现在该干什么<br>· <b>关键操作</b>：具体怎么做（浇水/打杈/蘸花/防病）<br>· <b>注意事项</b>：这个阶段容易踩的坑<br><br>直接发一句："我 X 月 X 日定植"就行。'
+  },
+  quiz: {
+    title: '农技知识测试',
+    welcome: '这是 <b>农技知识测试</b> 。<br><br>说一声「开始测试」，我会从育苗、定植、花果期、病虫害防治这几块给你出几道题，检验一下你的番茄种植水平。<br><br>答完我会批改，告诉你哪一块还需要补。'
+  }
+};
+
+(function(){
+  const params = new URLSearchParams(location.search);
+  const tab = params.get('tab') || 'qa';
+  const ask = params.get('ask');
+
+  // 1) 高亮侧边栏 + 更新标题
+  const items = document.querySelectorAll('.side-item[data-tab]');
+  items.forEach(it=>{
+    if(it.dataset.tab === tab){
+      it.classList.add('active');
+      const t = it.querySelector('span').textContent;
+      document.getElementById('pageTitle').textContent = t;
+      document.getElementById('crumbCurrent').textContent = t;
+    } else {
+      it.classList.remove('active');
+    }
+  });
+
+  // 2) 欢迎语（先占位，等身份确认后再填）
+  const info = TABS[tab] || TABS.qa;
+  const welcomeBub = document.getElementById('welcomeBub');
+
+  // 3) 身份询问：如果 localStorage 里没有 user_role，先问
+  const ROLE_KEY = 'tomato_user_role';
+  let role = localStorage.getItem(ROLE_KEY);
+
+  if(!role){
+    // 先显示身份询问气泡
+    welcomeBub.innerHTML = '您好！我是番茄智耘的 AI 农技师。<br><br>咱先简单唠一句——你是哪一类种植者？<br>选一个，我后面给的建议才贴你的实际情况。';
+
+    // 在欢迎气泡后面追加三个身份按钮
+    const roleMsg = document.createElement('div');
+    roleMsg.className = 'msg bot';
+    roleMsg.innerHTML = `
+      <div class="mini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6.5"/><path d="M12 7.5c-1.8-1.4-4.6-.7-5.7 1.2"/><path d="M12 7.5c1.8-1.4 4.6-.7 5.7 1.2"/></svg></div>
+      <div class="bub" style="padding:0;border:none;background:transparent;display:flex;flex-direction:column;gap:8px;min-width:260px">
+        <button class="role-btn" data-role="大棚种植户" style="padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:14.5px;cursor:pointer;text-align:left">🌱 我是大棚种植户</button>
+        <button class="role-btn" data-role="阳台种植者" style="padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:14.5px;cursor:pointer;text-align:left">🪴 我是阳台种植者</button>
+        <button class="role-btn" data-role="农技推广人员" style="padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:14.5px;cursor:pointer;text-align:left">📋 我是农技推广人员</button>
+      </div>`;
+    chatBody.appendChild(roleMsg);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // 绑定按钮点击
+    roleMsg.querySelectorAll('.role-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        role = btn.dataset.role;
+        localStorage.setItem(ROLE_KEY, role);
+        // 删掉按钮气泡
+        roleMsg.remove();
+        // 根据身份给出不同的接续语
+        const greetMap = {
+          '大棚种植户': '好嘞，大棚种植的事我门儿清——棚温湿度、水肥节奏、蘸花留果、病害防治，咱都按大棚实际来。',
+          '阳台种植者': '好嘞，阳台种番茄讲究个轻松好养——少用药、多晒太阳、盆土别积水，咱按阳台环境来。',
+          '农技推广人员': '好的，农技推广的同事。我会按 DB4201/T 713—2024 标准来讲，带依据和数据。'
+        };
+        addMsg('bot', greetMap[role] || '好的，了解你的身份了。');
+        // 再显示功能欢迎语
+        setTimeout(()=>{ welcomeBub.innerHTML = info.welcome; chatBody.scrollTop = chatBody.scrollHeight; }, 400);
+      });
+    });
+    return; // 身份没确认前，不继续往下
+  }
+
+  // 4) 已有身份，直接显示功能欢迎语
+  welcomeBub.innerHTML = info.welcome;
+
+  // 5) 兼容首页"看看它怎么答"：带 ask 参数时自动发问题
+  if(ask) setTimeout(()=>quickAsk(ask), 300);
+})();
+</script>
+</body>
+</html>
